@@ -79,10 +79,10 @@ endif
 MAKEFLAGS += --jobs=$(shell grep '^processor' /proc/cpuinfo | wc -l)
 
 # Required Preprocessor Macros:
-CPPDEFS += -Duse_netCDF -Duse_libMPI
+CPPDEFS += -Duse_netCDF
 
 # Additional Preprocessor Macros needed due to  Autotools and CMake
-CPPDEFS += -DHAVE_GETTID -DHAVE_SCHED_GETAFFINITY
+CPPDEFS += -DHAVE_SCHED_GETAFFINITY
 
 # Macro for Fortran preprocessor
 FPPFLAGS := $(INCLUDES)
@@ -177,7 +177,7 @@ FFLAGS += $(FFLAGS_COVERAGE) $(PROF_DIR)
 LDFLAGS += $(LDFLAGS_COVERAGE) $(PROF_DIR)
 endif
 
-These Algebra libraries Add solution to more complex vector matrix model equations
+# These Algebra libraries Add solution to more complex vector matrix model equations
 LIBS += -llapack -lblas
 LDFLAGS += $(LIBS)
 

@@ -49,9 +49,9 @@ NETCDF =             # If value is '3' and CPPDEFS contains
 INCLUDES =           # A list of -I Include directories to be added to the
                      # the compile command.
 
-ISA = -xsse2         # The Intel Instruction Set Archetecture (ISA) compile
-                     # option to use.  If blank, than use the default SSE
-                     # settings for the host.  Current default is to use SSE2.
+SSE = -msse2         # The SSE options to be used to compile.  If blank,
+                     # than use the default SSE settings for the host.
+                     # Current default is to use SSE2.
 
 COVERAGE =           # Add the code coverage compile options.
 
@@ -78,19 +78,13 @@ endif
 
 MAKEFLAGS += --jobs=$(shell grep '^processor' /proc/cpuinfo | wc -l)
 
-# Required Preprocessor Macros:
-CPPDEFS += -Duse_netCDF
-
-# Additional Preprocessor Macros needed due to  Autotools and CMake
-CPPDEFS += -DHAVE_SCHED_GETAFFINITY
-
 # Macro for Fortran preprocessor
-FPPFLAGS := -fpp -Wp,-w $(INCLUDES)
+FPPFLAGS = -fpp -Wp,-w $(INCLUDES)
 # Fortran Compiler flags for the NetCDF library
 FPPFLAGS += $(shell nf-config --fflags)
 
 # Base set of Fortran compiler flags
-FFLAGS := -fno-alias -auto -safe-cray-ptr -ftz -assume byterecl -i4 -r8 -nowarn -sox -traceback
+FFLAGS := -fno-alias -auto -safe-cray-ptr -ftz -assume byterecl -i4 -nowarn -sox -traceback
 
 # Flags based on perforance target (production (OPT), reproduction (REPRO), or debug (DEBUG)
 FFLAGS_OPT = -O3 -debug minimal -fp-model source
@@ -104,7 +98,7 @@ FFLAGS_VERBOSE = -v -V -what -warn all
 FFLAGS_COVERAGE = -prof-gen=srcpos
 
 # Macro for C preprocessor
-CPPFLAGS := -D__IFC $(INCLUDES)
+CPPFLAGS = -D__IFC $(INCLUDES)
 # C Compiler flags for the NetCDF library
 CPPFLAGS += $(shell nc-config --cflags)
 
@@ -123,8 +117,8 @@ CFLAGS_COVERAGE = -prof-gen=srcpos
 
 # Optional Testing compile flags.  Mutually exclusive from DEBUG, REPRO, and OPT
 # *_TEST will match the production if no new option(s) is(are) to be tested.
-FFLAGS_TEST := $(FFLAGS_OPT)
-CFLAGS_TEST := $(CFLAGS_OPT)
+FFLAGS_TEST = $(FFLAGS_OPT)
+CFLAGS_TEST = $(CFLAGS_OPT)
 
 # Linking flags
 LDFLAGS :=
@@ -156,9 +150,9 @@ FFLAGS += $(FFLAGS_OPENMP)
 LDFLAGS += $(LDFLAGS_OPENMP)
 endif
 
-ifdef ISA
-CFLAGS += $(ISA)
-FFLAGS += $(ISA)
+ifdef SSE
+CFLAGS += $(SSE)
+FFLAGS += $(SSE)
 endif
 
 ifdef NO_OVERRIDE_LIMITS
@@ -173,7 +167,9 @@ endif
 
 ifeq ($(NETCDF),3)
   # add the use_LARGEFILE cppdef
-  CPPDEFS += -Duse_LARGEFILE
+  ifneq ($(findstring -Duse_netCDF,$(CPPDEFS)),)
+    CPPDEFS += -Duse_LARGEFILE
+  endif
 endif
 
 ifdef COVERAGE
